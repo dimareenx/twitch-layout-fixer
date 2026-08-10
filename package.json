@@ -1,13 +1,13 @@
 {
   "name": "twitch-layout-fixer",
   "version": "1.0.0",
-  "description": "Twitch layout fixer for Nightbot",
+  "description": "Twitch live layout fixer bot",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.6.0",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "tmi.js": "^1.8.5"
   }
 }
