@@ -21,7 +21,7 @@ const userLastMessages = new Map();
 // ЗАМІНИ 'tвой_нік_на_твічі' на свій реальний нікнейм у нижньому регістрі!
 const client = new tmi.Client({
   options: { debug: false },
-  channels: ['твой_нік_на_твічі'] 
+  channels: ['lob0da_'] 
 });
 
 client.connect().catch(console.error);
