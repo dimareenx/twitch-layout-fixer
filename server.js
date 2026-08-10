@@ -1,10 +1,10 @@
 const express = require('express');
-const axios = require('axios');
+const tmi = require('tmi.js'); // Бібліотека для підключення до Twitch чату
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Словник замін розкладки (англійська -> українська)
+// Словник для переведення розкладки (англійська -> українська)
 const map = {
   q:'й', w:'ц', e:'у', r:'к', t:'е', y:'н', u:'г', i:'ш', o:'щ', p:'з', '[':'х', ']':'ї',
   a:'ф', s:'і', d:'в', f:'а', g:'п', h:'р', j:'о', k:'л', l:';', "'":"'",
@@ -14,14 +14,30 @@ const map = {
   Z:'Я', X:'Ч', C:'С', V:'М', B:'И', N:'Т', M:'Ь', '<':'Б', '>':'Ю', '?':'.'
 };
 
-// Тимчасове сховище для останніх повідомлень користувачів у пам'яті сервера
+// Пам'ять для останніх повідомлень кожного користувача
 const userLastMessages = new Map();
+
+// Налаштування підключення бота до Twitch-чату
+// ЗАМІНИ 'tвой_нік_на_твічі' на свій реальний нікнейм у нижньому регістрі!
+const client = new tmi.Client({
+  options: { debug: false },
+  channels: ['твой_нік_на_твічі'] 
+});
+
+client.connect().catch(console.error);
+
+// Слухаємо чат у реальному часі
+client.on('message', (channel, tags, message, self) => {
+  if (self) return; // Ігноруємо повідомлення самого бота
+  const username = tags.username.toLowerCase();
+  userLastMessages.set(username, message);
+});
 
 function translateText(text) {
   return [...text].map(c => map[c] || c).join('');
 }
 
-// Ендпоінт, до якого звертається Nightbot через urlfetch
+// Ендпоінт для Nightbot
 app.get('/fix', (req, res) => {
   const username = req.query.user;
   
@@ -32,16 +48,15 @@ app.get('/fix', (req, res) => {
   const lastMsg = userLastMessages.get(username.toLowerCase());
   
   if (!lastMsg) {
-    return res.send("Не знайдено останніх повідомлень.");
+    return res.send("Ще немає повідомлень у пам'яті.");
   }
 
   const fixed = translateText(lastMsg);
   res.send(`Хотів сказати: ${fixed}`);
 });
 
-// Простий вебхук або тестова сторінка
 app.get('/', (req, res) => {
-  res.send('Twitch Layout Fixer Bot is running!');
+  res.send('Twitch Live Layout Fixer is running!');
 });
 
 app.listen(PORT, () => {
